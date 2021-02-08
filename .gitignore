@@ -1,0 +1,18 @@
+## Jar should not be added
+/*jars
+
+## Gradle unwanted check-in
+/.gradle/
+.gradle
+*class
+*war
+build
+*jar
+## IDEA specific files
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
+*/out/
+out/

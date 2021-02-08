@@ -3,12 +3,14 @@ package com.xmeme.pojo;
 import com.xmeme.clientobjects.ClientMeme;
 import com.xmeme.utils.Constants;
 import com.xmeme.utils.IOCommonUtil;
+import org.hibernate.annotations.DynamicUpdate;
 import org.json.JSONObject;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "memes")
+@DynamicUpdate
 public class Memes {
 
     @Id
@@ -17,12 +19,12 @@ public class Memes {
     private long meme_id;
     @Column(name = "caption")
     private String caption;
-    @Column(name = "url")
+    @Column(name = "url" )
     private String url;
-    @Column(name = "created_time")
+    @Column(name = "created_time", updatable = false)
     private long created_time;
 
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", updatable = false)
     @ManyToOne(fetch = FetchType.EAGER)
     private MemeCreator memeCreator;
 

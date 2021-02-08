@@ -17,6 +17,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 public class MemeCreatorManager {
+    /**
+     * @param memeCreatorName is the creator name to search
+     * @return MemeCreator Object
+     */
     public MemeCreator getCreator(String creatorName) {
         Transaction tx = null;
         MemeCreator memeCreator = null;
@@ -27,10 +31,10 @@ public class MemeCreatorManager {
             CriteriaQuery<MemeCreator> query = builder.createQuery(MemeCreator.class);
             Root<MemeCreator> root = query.from(MemeCreator.class);
             query.select(root).where(builder.equal(root.get("owner_name"), creatorName)); // NO I18N
-            TypedQuery<MemeCreator> querys =  session.createQuery(query);
+            TypedQuery<MemeCreator> querys = session.createQuery(query);
             List<MemeCreator> allMemeCreators = querys.getResultList();
-            if(IOCommonUtil.isValidList(allMemeCreators)){
-                memeCreator =allMemeCreators.get(0);
+            if (IOCommonUtil.isValidList(allMemeCreators)) {
+                memeCreator = allMemeCreators.get(0);
             }
             tx.commit();
         } catch (HibernateException e) {
@@ -42,6 +46,10 @@ public class MemeCreatorManager {
         return memeCreator;
     }
 
+    /**
+     * @param memeCreatorName is the creator name to add
+     * @return MemeCreator Object
+     */
     public MemeCreator addMemeCreator(String memeCreatorName) {
         Session session = HibernateUtil.getSession();
         org.hibernate.Transaction tr = session.beginTransaction();

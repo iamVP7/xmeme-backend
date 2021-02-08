@@ -3,7 +3,6 @@ package com.xmeme.handler;
 import com.xmeme.clientobjects.ClientMeme;
 import com.xmeme.pojo.MemeCreator;
 import com.xmeme.pojo.Memes;
-import com.xmeme.pojo.Memes;
 import com.xmeme.utils.Constants;
 import com.xmeme.utils.HibernateUtil;
 import com.xmeme.utils.IOCommonUtil;
@@ -16,6 +15,11 @@ import javax.persistence.criteria.*;
 import java.util.List;
 
 public class MemeManager {
+    /**
+     * <p> get memes based on page order</p>
+     * @param pageOrder page order is 1 or 2 or 3.
+     * @return list of Memes from db
+     */
     public List<Memes> getAllMemes(final int pageOrder) {
         Transaction tx = null;
         List<Memes> memeObject = null;
@@ -45,6 +49,13 @@ public class MemeManager {
     }
 
 
+    /**
+     *
+     * @param memeObjectDetails is the client meme object
+     * @param creator is the creator details
+     * @param memeID is the specific meme id to fetch
+     * @return will return Meme from     database
+     */
     public Memes getExistingMeme(final ClientMeme memeObjectDetails, final MemeCreator creator, final long memeID) {
         Transaction tx = null;
         Memes memeObject = null;
@@ -66,6 +77,13 @@ public class MemeManager {
         return memeObject;
     }
 
+    /**
+     *
+     * @param memeObjectDetails is the client meme object
+     * @param creator is the creator details
+     * @param memeID is the specific meme id to fetch
+     * @return will return typed Query to fetch memes
+     */
     private TypedQuery<Memes> getSelectQuery(final Session session, final ClientMeme memeObjectDetails,
                                              final MemeCreator creator, final long memeID) {
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -80,7 +98,13 @@ public class MemeManager {
         return session.createQuery(query);
     }
 
-
+    /**
+     *
+     * @param memeObjectDetails is the client meme object
+     * @param creator is the creator details
+     * @param memeID is the specific meme id to fetch
+     * @return  condition to fetch
+     */
     private Predicate[] getPredications(final CriteriaBuilder builder, final Root<Memes> root,
                                         final ClientMeme memeObjectDetails,
                                         final MemeCreator creator, final long memeID) {
@@ -100,6 +124,12 @@ public class MemeManager {
         return null;
     }
 
+    /**
+     *
+     * @param memeObjectDetails is the client meme object
+     * @param creator is the creator details
+     * @return will add Meme into database
+     */
     public Memes addMeme(final ClientMeme memeObjectDetails, final MemeCreator creator) {
         Session session = HibernateUtil.getSession();
         org.hibernate.Transaction tr = session.beginTransaction();
@@ -112,5 +142,15 @@ public class MemeManager {
         return memeCreated;
     }
 
+    public Memes updateMeme(Memes updatedMeme) {
+        Session session = HibernateUtil.getSession();
+        org.hibernate.Transaction tr = session.beginTransaction();
+        session.saveOrUpdate(updatedMeme);
+        tr.commit();
+        if (session != null) {
+            session.close();
+        }
+        return updatedMeme;
+    }
 
 }

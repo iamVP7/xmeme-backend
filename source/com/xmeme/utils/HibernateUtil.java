@@ -34,6 +34,10 @@ public class HibernateUtil {
         return sessionFactory;
     }
 
+    /**
+     * <p>get the session object for query</p>
+     * @return new SEssion object for queries
+     */
     public static Session getSession() {
 
         return HibernateUtil.getSessionFactory().openSession();

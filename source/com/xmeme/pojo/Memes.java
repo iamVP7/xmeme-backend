@@ -28,6 +28,8 @@ public class Memes {
     @ManyToOne(fetch = FetchType.EAGER)
     private MemeCreator memeCreator;
 
+    @Column(name = "owner_id",insertable = false, updatable = false)
+    private long owner_id;
 
 
     public Memes() {
@@ -73,7 +75,11 @@ public class Memes {
     }
 
     public MemeCreator getMemeCreator() {
-        return memeCreator;
+        return this.memeCreator;
+    }
+
+    public long getOwnerID() {
+        return this.memeCreator.getOwnerID();
     }
 
     public void setMemeCreator(MemeCreator memeCreator) {

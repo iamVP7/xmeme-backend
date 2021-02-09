@@ -56,13 +56,13 @@ public class MemeManager {
      * @param memeID is the specific meme id to fetch
      * @return will return Meme from     database
      */
-    public Memes getExistingMeme(final ClientMeme memeObjectDetails, final MemeCreator creator, final long memeID) {
+    public Memes getExistingMeme(final Memes memeToCheck, final long memeID) {
         Transaction tx = null;
         Memes memeObject = null;
         try (Session session = HibernateUtil.getSession()) {
             tx = session.beginTransaction();
 
-            TypedQuery<Memes> querys = getSelectQuery(session, memeObjectDetails, creator, memeID);
+            TypedQuery<Memes> querys = getSelectQuery(session, memeToCheck, memeID);
             List<Memes> allMemess = querys.getResultList();
             if (IOCommonUtil.isValidList(allMemess)) {
                 memeObject = allMemess.get(0);
@@ -84,14 +84,13 @@ public class MemeManager {
      * @param memeID is the specific meme id to fetch
      * @return will return typed Query to fetch memes
      */
-    private TypedQuery<Memes> getSelectQuery(final Session session, final ClientMeme memeObjectDetails,
-                                             final MemeCreator creator, final long memeID) {
+    private TypedQuery<Memes> getSelectQuery(final Session session, final Memes memeToCheck, final long memeID) {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Memes> query = builder.createQuery(Memes.class);
         Root<Memes> root = query.from(Memes.class);
         //Join<Memes, MemeCreator> join = root.join("owner_id");
 
-        Predicate[] predicates = getPredications(builder, root, memeObjectDetails, creator, memeID);
+        Predicate[] predicates = getPredications(builder, root, memeToCheck, memeID);
 
         query.select(root).where(predicates);
 
@@ -106,15 +105,15 @@ public class MemeManager {
      * @return  condition to fetch
      */
     private Predicate[] getPredications(final CriteriaBuilder builder, final Root<Memes> root,
-                                        final ClientMeme memeObjectDetails,
-                                        final MemeCreator creator, final long memeID) {
+                                        final Memes memeToCheck, final long memeID) {
 
-        if (IOCommonUtil.isValidObject(memeObjectDetails) && IOCommonUtil.isValidObject(creator)) {
+        if (IOCommonUtil.isValidObject(memeToCheck) ) {
             Predicate[] predicates = new Predicate[3];
 
-            predicates[0] = builder.equal(root.get("owner_id"), creator.getOwnerID()); // NO I18N
-            predicates[1] = builder.equal(root.get("url"), memeObjectDetails.getUrl()); // NO I18N
-            predicates[2] = builder.equal(root.get("caption"), memeObjectDetails.getCaption()); // NO I18N
+            predicates[1] = builder.equal(root.get("url"), memeToCheck.getUrl()); // NO I18N
+            predicates[2] = builder.equal(root.get("caption"), memeToCheck.getCaption()); // NO I18N
+            predicates[0] = builder.equal(root.get("owner_id"), memeToCheck.getMemeCreator().getOwnerID()); // NO I18N
+
             return predicates;
         } else if (IOCommonUtil.isValidLong(memeID)) {
             Predicate[] predicates = new Predicate[1];

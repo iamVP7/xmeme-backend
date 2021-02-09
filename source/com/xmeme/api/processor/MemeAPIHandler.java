@@ -99,7 +99,8 @@ public class MemeAPIHandler {
      */
     private Memes getExistingMeme(final ClientMeme clientClientMeme, final MemeCreator memeCreator) {
         try {
-            return new MemeManager().getExistingMeme(clientClientMeme, memeCreator, Constants.DEFAULT_LONG);
+            Memes memeToCheck =new Memes(clientClientMeme,memeCreator);
+            return new MemeManager().getExistingMeme(memeToCheck, Constants.DEFAULT_LONG);
         } catch (Exception exception) {
             XMemeLogger.warning(MEME_API_LOGGER, exception);
         }
@@ -183,7 +184,7 @@ public class MemeAPIHandler {
             if (IOCommonUtil.isValidString(memeIDToFetch)) {
                 long memeID = Long.parseLong(memeIDToFetch);
                 if (IOCommonUtil.isValidLong(memeID)) {
-                    Memes memeObjecFetch = new MemeManager().getExistingMeme(null, null, memeID);
+                    Memes memeObjecFetch = new MemeManager().getExistingMeme(null,  memeID);
                     if (IOCommonUtil.isValidObject(memeObjecFetch)) {
                         JSONObject responseJSON = getClientJSON(memeObjecFetch);
                         return new ResponseConstructors.ResponseBuilder()
@@ -221,7 +222,7 @@ public class MemeAPIHandler {
         if (IOCommonUtil.isValidObject(clientClientMeme)) {
             try {
                 clientClientMeme.validate();
-                Memes exisitingMeme = new MemeManager().getExistingMeme(null, null, Long.parseLong(memeID));
+                Memes exisitingMeme = new MemeManager().getExistingMeme(null,  Long.parseLong(memeID));
                 if (IOCommonUtil.isValidObject(exisitingMeme)) {
                     Memes updatedMeme =getMemeToUpdate(exisitingMeme,clientClientMeme);
                     Memes newUPdatedMeme = new MemeManager().updateMeme(updatedMeme);

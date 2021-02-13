@@ -9,7 +9,6 @@ import com.xmeme.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.logging.Logger;
@@ -27,7 +26,10 @@ public class MemeAPIHandler {
         if (IOCommonUtil.isValidObject(clientClientMeme)) {
             try {
                 clientClientMeme.validate();
-                MemeCreator memeCreator = getMemerCreator(clientClientMeme);
+                MemeCreator searchCreator = new MemeCreator();
+                searchCreator.setOwnerName(clientClientMeme.getName());
+
+                MemeCreator memeCreator = getMemerCreator(searchCreator);
                 Memes createdMeme = checkAndCreateMeme(clientClientMeme, memeCreator);
                 if (IOCommonUtil.isValidObject(createdMeme)) {
                     return getMemeCreatedResponse(createdMeme);
@@ -64,8 +66,9 @@ public class MemeAPIHandler {
      * @throws XMemeException is thrown when the MEME already exist
      */
     private Memes checkAndCreateMeme(final ClientMeme clientClientMeme, final MemeCreator memeCreator) throws XMemeException {
-        Memes existingMeme = getExistingMeme(clientClientMeme, memeCreator);
-        if (IOCommonUtil.isValidObject(existingMeme) && IOCommonUtil.isValidLong(existingMeme.getMemeId())) {
+        List<Memes> existingMeme = getExistingMeme(clientClientMeme, memeCreator);
+        if (IOCommonUtil.isValidList(existingMeme) && IOCommonUtil.isValidObject(existingMeme.get(Constants.FIRST_INDEX)) &&
+                IOCommonUtil.isValidLong(existingMeme.get(Constants.FIRST_INDEX).getMemeId())) {
             throw new XMemeException.MemeAlreadyExist();
         }
         return createMeme(clientClientMeme, memeCreator);
@@ -77,18 +80,25 @@ public class MemeAPIHandler {
      * @param clientClientMeme is the client meme object
      * @return MemeCreator if already exist or creates newly and sents
      */
-    private MemeCreator getMemerCreator(ClientMeme clientClientMeme) {
+    private MemeCreator getMemerCreator(MemeCreator searchCreator) {
         MemeCreator creator = null;
         try {
-            creator = new MemeCreatorManager().getCreator(clientClientMeme.getName());
-            XMemeLogger.info(MEME_API_LOGGER, "the creator id is:::" + creator.getOwnerID()); // NO I18N
+            creator = searchMemeCreator(searchCreator);
         } catch (Exception exception) {
             XMemeLogger.warning(MEME_API_LOGGER, exception);
         }
         if (!IOCommonUtil.isValidObject(creator)) {
-            creator = new MemeCreatorManager().addMemeCreator(clientClientMeme.getName());
+            creator = new MemeCreatorManager().addMemeCreator(searchCreator.getOwnerName());
         }
         return creator;
+    }
+
+    /**
+     * @param searchCreator is the memecreator object which we need to search from DB
+     * @return if found new CreatorObject else null
+     */
+    private MemeCreator searchMemeCreator(final MemeCreator searchCreator) {
+        return new MemeCreatorManager().getCreator(searchCreator);
     }
 
     /**
@@ -97,9 +107,9 @@ public class MemeAPIHandler {
      * @param clientClientMeme is the client meme object
      * @return Meme which is exists or null is not
      */
-    private Memes getExistingMeme(final ClientMeme clientClientMeme, final MemeCreator memeCreator) {
+    private List<Memes> getExistingMeme(final ClientMeme clientClientMeme, final MemeCreator memeCreator) {
         try {
-            Memes memeToCheck =new Memes(clientClientMeme,memeCreator);
+            Memes memeToCheck = new Memes(clientClientMeme, memeCreator);
             return new MemeManager().getExistingMeme(memeToCheck, Constants.DEFAULT_LONG);
         } catch (Exception exception) {
             XMemeLogger.warning(MEME_API_LOGGER, exception);
@@ -131,6 +141,14 @@ public class MemeAPIHandler {
      */
     public Response getAllMemes(final String pageOrder) {
         List<Memes> allExisitingMemes = new MemeManager().getAllMemes(getPageOrder(pageOrder));
+        return getAllMemesResponse(allExisitingMemes );
+    }
+
+    /**
+     * @param allExisitingMemes is the list of meme objects which we got from DB
+     * @return response to the client
+     */
+    private Response getAllMemesResponse(final List<Memes> allExisitingMemes ){
         JSONArray responseJSON = getClientMemeJSON(allExisitingMemes);
         return new ResponseConstructors.ResponseBuilder()
                 .setResponseCode(Constants.HTTP_FEATCH_SUCCESS)
@@ -184,9 +202,9 @@ public class MemeAPIHandler {
             if (IOCommonUtil.isValidString(memeIDToFetch)) {
                 long memeID = Long.parseLong(memeIDToFetch);
                 if (IOCommonUtil.isValidLong(memeID)) {
-                    Memes memeObjecFetch = new MemeManager().getExistingMeme(null,  memeID);
-                    if (IOCommonUtil.isValidObject(memeObjecFetch)) {
-                        JSONObject responseJSON = getClientJSON(memeObjecFetch);
+                    List<Memes> memeObjecFetch = new MemeManager().getExistingMeme(null, memeID);
+                    if (IOCommonUtil.isValidList(memeObjecFetch)) {
+                        JSONObject responseJSON = getClientJSON(memeObjecFetch.get(Constants.FIRST_INDEX));
                         return new ResponseConstructors.ResponseBuilder()
                                 .setResponseCode(Constants.HTTP_FEATCH_SUCCESS)
                                 .setClientJSON(responseJSON)
@@ -222,14 +240,14 @@ public class MemeAPIHandler {
         if (IOCommonUtil.isValidObject(clientClientMeme)) {
             try {
                 clientClientMeme.validate();
-                Memes exisitingMeme = new MemeManager().getExistingMeme(null,  Long.parseLong(memeID));
-                if (IOCommonUtil.isValidObject(exisitingMeme)) {
-                    Memes updatedMeme =getMemeToUpdate(exisitingMeme,clientClientMeme);
+                List<Memes> exisitingMemes = new MemeManager().getExistingMeme(null, Long.parseLong(memeID));
+                if (IOCommonUtil.isValidObject(exisitingMemes)) {
+                    Memes updatedMeme = getMemeToUpdate(exisitingMemes.get(Constants.FIRST_INDEX), clientClientMeme);
                     Memes newUPdatedMeme = new MemeManager().updateMeme(updatedMeme);
                     if (IOCommonUtil.isValidObject(newUPdatedMeme)) {
                         return ResponseConstructors.updateSuccess();
                     }
-                }else {
+                } else {
                     return ResponseConstructors.notFound();
                 }
             } catch (XMemeException exception) {
@@ -240,13 +258,39 @@ public class MemeAPIHandler {
         return ResponseConstructors.notModified();
     }
 
-    private Memes getMemeToUpdate(Memes exisitingMeme,final ClientMeme clientClientMeme){
-        if(IOCommonUtil.isValidObject(clientClientMeme.getUrl())) {
+    /**
+     * @param exisitingMeme is the existing meme object in DB
+     * @param clientClientMeme is the object which we need to update
+     * @return a new updated exisitingMeme object to upudate in db
+     */
+    private Memes getMemeToUpdate(Memes exisitingMeme, final ClientMeme clientClientMeme) {
+        if (IOCommonUtil.isValidObject(clientClientMeme.getUrl())) {
             exisitingMeme.setUrl(clientClientMeme.getUrl());
         }
-        if(IOCommonUtil.isValidObject(clientClientMeme.getCaption())) {
+        if (IOCommonUtil.isValidObject(clientClientMeme.getCaption())) {
             exisitingMeme.setCaption(clientClientMeme.getCaption());
         }
         return exisitingMeme;
+    }
+
+    /**
+     *
+     * @param authorID is the author id which we need to fetch
+     * @return if authorid not found 404 or 200 with response json
+     */
+    public Response getMemesByAuthor(final String authorID) {
+
+        try {
+            MemeCreator searchCreator = new MemeCreator();
+            searchCreator.setId(Long.parseLong(authorID));
+            MemeCreator creator = searchMemeCreator(searchCreator);
+            if(IOCommonUtil.isValidObject(creator)){
+                List<Memes> allFetchedMems = getExistingMeme(null, creator);
+                return getAllMemesResponse(allFetchedMems );
+            }
+        } catch (Exception exceptionObj) {
+            XMemeLogger.warning(MEME_API_LOGGER, exceptionObj);
+        }
+        return ResponseConstructors.notFound();
     }
 }

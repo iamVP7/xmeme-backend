@@ -36,8 +36,10 @@ public class Memes {
     }
 
     public Memes(ClientMeme memeObjectDetails,MemeCreator creator) {
-        this.caption = memeObjectDetails.getCaption();
-        this.url = memeObjectDetails.getUrl();
+        if(IOCommonUtil.isValidObject(memeObjectDetails)) {
+            this.caption = memeObjectDetails.getCaption();
+            this.url = memeObjectDetails.getUrl();
+        }
         this.created_time = IOCommonUtil.getCurrentMillSecondsinUTC();
         this.memeCreator =creator;
     }
@@ -86,11 +88,17 @@ public class Memes {
         this.memeCreator = memeCreator;
     }
 
+    /**
+     * @return JSONObject which is sent to the client
+     */
     public JSONObject valueAsJSON(){
         JSONObject clientJSON = IOCommonUtil.addJSONKeyValue(null, Constants.CLIENT_KEY_URL,this.url);
         clientJSON = IOCommonUtil.addJSONKeyValue(clientJSON, Constants.CLIENT_KEY_CAPTION,this.caption);
         clientJSON = IOCommonUtil.addJSONKeyValue(clientJSON, Constants.CLIENT_MEME_ID,this.meme_id);
+        clientJSON = IOCommonUtil.addJSONKeyValue(clientJSON, Constants.CLIENT_CREATED_TIME,
+                String.valueOf(this.created_time));
         clientJSON = IOCommonUtil.addJSONKeyValue(clientJSON, Constants.MEME_CREATOR_NAME,this.getMemeCreator().getOwnerName());
+        clientJSON = IOCommonUtil.addJSONKeyValue(clientJSON, Constants.MEME_CREATOR_ID,this.getMemeCreator().getOwnerID());
         return clientJSON;
     }
 }

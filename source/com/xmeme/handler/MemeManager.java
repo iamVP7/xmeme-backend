@@ -56,16 +56,16 @@ public class MemeManager {
      * @param memeID is the specific meme id to fetch
      * @return will return Meme from     database
      */
-    public Memes getExistingMeme(final Memes memeToCheck, final long memeID) {
+    public List<Memes> getExistingMeme(final Memes memeToCheck, final long memeID) {
         Transaction tx = null;
-        Memes memeObject = null;
+        List<Memes> memeObject = null;
         try (Session session = HibernateUtil.getSession()) {
             tx = session.beginTransaction();
 
             TypedQuery<Memes> querys = getSelectQuery(session, memeToCheck, memeID);
             List<Memes> allMemess = querys.getResultList();
             if (IOCommonUtil.isValidList(allMemess)) {
-                memeObject = allMemess.get(0);
+                memeObject = allMemess;
             }
             tx.commit();
         } catch (HibernateException e) {
@@ -108,13 +108,19 @@ public class MemeManager {
                                         final Memes memeToCheck, final long memeID) {
 
         if (IOCommonUtil.isValidObject(memeToCheck) ) {
-            Predicate[] predicates = new Predicate[3];
 
-            predicates[1] = builder.equal(root.get("url"), memeToCheck.getUrl()); // NO I18N
-            predicates[2] = builder.equal(root.get("caption"), memeToCheck.getCaption()); // NO I18N
-            predicates[0] = builder.equal(root.get("owner_id"), memeToCheck.getMemeCreator().getOwnerID()); // NO I18N
+            if(IOCommonUtil.isValidObject(memeToCheck.getUrl()) && IOCommonUtil.isValidObject(memeToCheck.getCaption()) && IOCommonUtil.isValidObject(memeToCheck.getMemeCreator())){
+                Predicate[] predicates = new Predicate[3];
 
-            return predicates;
+                predicates[1] = builder.equal(root.get("url"), memeToCheck.getUrl()); // NO I18N
+                predicates[2] = builder.equal(root.get("caption"), memeToCheck.getCaption()); // NO I18N
+                predicates[0] = builder.equal(root.get("owner_id"), memeToCheck.getMemeCreator().getOwnerID()); // NO I18N
+                return predicates;
+            } else if(IOCommonUtil.isValidObject(memeToCheck.getMemeCreator())){
+                Predicate[] predicates = new Predicate[1];
+                predicates[0] = builder.equal(root.get("owner_id"), memeToCheck.getMemeCreator().getOwnerID()); // NO I18N
+                return predicates;
+            }
         } else if (IOCommonUtil.isValidLong(memeID)) {
             Predicate[] predicates = new Predicate[1];
             predicates[0] = builder.equal(root.get("meme_id"), memeID); // NO I18N
@@ -141,6 +147,11 @@ public class MemeManager {
         return memeCreated;
     }
 
+    /**
+     *
+     * @param updatedMeme is the object which is used to update in db for specific memeid
+     * @return if updated same object is returned.
+     */
     public Memes updateMeme(Memes updatedMeme) {
         Session session = HibernateUtil.getSession();
         org.hibernate.Transaction tr = session.beginTransaction();

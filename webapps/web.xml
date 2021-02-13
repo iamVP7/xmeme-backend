@@ -16,7 +16,7 @@
 
     <servlet-mapping>
         <servlet-name>XMemeAPI</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/memes/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

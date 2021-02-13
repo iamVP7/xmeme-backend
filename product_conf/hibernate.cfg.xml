@@ -7,10 +7,10 @@
     <session-factory>
 
         <!-- change the user name -->
-        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.username">xmeme</property>
 
         <!-- change the password -->
-        <property name="hibernate.connection.password"></property>
+        <property name="hibernate.connection.password">xmememysql</property>
 
         <!-- limit threads based on the configuration -->
         <property name="hibernate.connection.pool_size">10</property>

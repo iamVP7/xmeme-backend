@@ -32,12 +32,12 @@ public class IOCommonUtil {
     }
 
     /**
-     * <p>check if string is null and nut empty</p>
+     * <p>check if string is not null and nut empty</p>
      * @param objectToCheck
      * @return
      */
     public static boolean isValidString(String objectToCheck) {
-        return !isValidObject(objectToCheck) || !objectToCheck.equalsIgnoreCase(Constants.EMPTY_STRING);
+        return isValidObject(objectToCheck) && !objectToCheck.equalsIgnoreCase(Constants.EMPTY_STRING);
     }
 
     public static JSONObject addJSONKeyValue(JSONObject objecToModifiy, String keyToAdd, Object valueToInsert) {
@@ -50,7 +50,7 @@ public class IOCommonUtil {
                 objecToModifiy.put(keyToAdd, valueToInsert);
             }
         } catch (JSONException exception) {
-
+            XMemeLogger.info(IO_LOGGER,exception.getMessage());
         }
         return objecToModifiy;
     }

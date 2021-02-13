@@ -21,7 +21,7 @@ public class MemeCreatorManager {
      * @param memeCreatorName is the creator name to search
      * @return MemeCreator Object
      */
-    public MemeCreator getCreator(String creatorName) {
+    public MemeCreator getCreator(MemeCreator searchCreator) {
         Transaction tx = null;
         MemeCreator memeCreator = null;
         try (Session session = HibernateUtil.getSession()) {
@@ -30,7 +30,11 @@ public class MemeCreatorManager {
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<MemeCreator> query = builder.createQuery(MemeCreator.class);
             Root<MemeCreator> root = query.from(MemeCreator.class);
-            query.select(root).where(builder.equal(root.get("owner_name"), creatorName)); // NO I18N
+            if(IOCommonUtil.isValidString(searchCreator.getOwnerName())) {
+                query.select(root).where(builder.equal(root.get("owner_name"), searchCreator.getOwnerName())); // NO I18N
+            }else if(IOCommonUtil.isValidLong(searchCreator.getOwnerID())){
+                query.select(root).where(builder.equal(root.get("owner_id"), searchCreator.getOwnerID())); // NO I18N
+            }
             TypedQuery<MemeCreator> querys = session.createQuery(query);
             List<MemeCreator> allMemeCreators = querys.getResultList();
             if (IOCommonUtil.isValidList(allMemeCreators)) {

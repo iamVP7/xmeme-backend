@@ -50,11 +50,13 @@ public class ClientMeme {
     }
 
     /*
-    URL should not be empty
+    URL should not be empty and also should not be more than 1000 chars
      */
-    private void checkURL() throws XMemeException.MandatoryKeyNotFound {
+    private void checkURL() throws XMemeException.MandatoryKeyNotFound, XMemeException.ImproperValueSet {
         if (!IOCommonUtil.isValidString(this.url)) {
             throw new XMemeException.MandatoryKeyNotFound(APIErrorMessage.ERRORCODE.URL_NOT_PRESENT, Constants.CLIENT_KEY_URL);
+        } else if (this.url.length() > 1000 || !(this.url.startsWith(Constants.HTTPS) || this.url.startsWith(Constants.HTTP))) {
+            throw new XMemeException.ImproperValueSet(APIErrorMessage.ERRORCODE.IMPROPER_URL, Constants.CLIENT_KEY_URL);
         }
     }
 

@@ -1,5 +1,5 @@
 ## Jar should not be added
-/*jars
+
 
 ## Gradle unwanted check-in
 /.gradle/

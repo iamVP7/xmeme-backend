@@ -63,9 +63,11 @@ public class ClientMeme {
     /*
     Caption should not be empty
      */
-    private void checkCaption() throws XMemeException.MandatoryKeyNotFound {
+    private void checkCaption() throws XMemeException.MandatoryKeyNotFound, XMemeException.ImproperValueSet {
         if (!IOCommonUtil.isValidString(this.caption)) {
             throw new XMemeException.MandatoryKeyNotFound(APIErrorMessage.ERRORCODE.CAPTION_NOT_PRESENT, Constants.CLIENT_KEY_CAPTION);
+        } else if (this.caption.length() > 95) {
+            throw new XMemeException.ImproperValueSet(APIErrorMessage.ERRORCODE.IMPROPER_CAPTION, Constants.CLIENT_KEY_CAPTION);
         }
     }
 
@@ -73,7 +75,11 @@ public class ClientMeme {
     /*
     User Name  should not be empty
      */
-    private void checkName() {
-        IOCommonUtil.isValidString(name);
+    private void checkName() throws XMemeException.MandatoryKeyNotFound, XMemeException.ImproperValueSet{
+        if (!IOCommonUtil.isValidString(name)){
+            throw new XMemeException.MandatoryKeyNotFound(APIErrorMessage.ERRORCODE.AUTHOR_NOT_PRESENT, Constants.MEME_CREATOR_NAME);
+        } else if (this.name.length() > 45) {
+            throw new XMemeException.ImproperValueSet(APIErrorMessage.ERRORCODE.IMPROPER_NAME, Constants.MEME_CREATOR_NAME);
+        }
     }
 }
